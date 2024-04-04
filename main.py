@@ -55,7 +55,7 @@ def control(data, lock):
         dt = getDT()
 
         ### Your code goes here
-        qube.setMotorVoltage(24)
+        qube.setMotorVoltage(18)
         # qube.setMotorSpeed(999)
         qube.getPendulumAngle()
         qube.getMotorCurrent()
