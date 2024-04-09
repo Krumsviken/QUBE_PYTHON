@@ -12,16 +12,16 @@ B = np.array([[0],
 C = np.array([[0, 1, 0]])
 D = np.array([[0]])
 
-# Sampling time (choose based on the dynamics of your system)
-dt = 0.0001
+# Sampling time
+dt = 0.1
 
 # Discretize system matrices using Forward Euler
 Ad = np.eye(3) + dt * A
 Bd = dt * B
 
 # Controller gain (K) and observer gain (L)
-K = np.array([[0.5303, 0.0521, 0.0031]]) 
-L = np.array([[-998], [878], [63937]]) 
+K = np.array([[62.618, 1.2501, 0.016123]]) 
+L = np.array([[-998.48], [4320], [1547700]]) 
 
 # Initial conditions
 x_est = np.zeros((3, 1))  # Initial state estimate

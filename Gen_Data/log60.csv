@@ -1,0 +1,2 @@
+time,motor_angle,motor_setpoint,pendulum_angle,pendulum_setpoint,rpm,voltage,current,x_real,"x_est_0, x_est_1, x_est_2",u
+2.948,0.0,0,0.0,0,0,0,0,,,

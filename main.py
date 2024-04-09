@@ -17,6 +17,7 @@ from com import *
 from liveplot import *
 from time import time
 import threading
+import numpy as np
 
 # Replace with the Arduino port. Can be found in the Arduino IDE (Tools -> Port:)
 port = "COM8"
@@ -32,13 +33,14 @@ enableLogging()
 
 t_last = time()
 
-
-m_target = 0
+m_target = 180
 p_target = 0
-pid = PID()
+observer = Observer()
+setpoint = 180
 
 def control(data, lock):
-    global m_target, p_target, pid
+    global m_target, p_target, observer
+    last_controller_input = 0
     while True:
         # Updates the qube - Sends and receives data
         qube.update()
@@ -49,18 +51,25 @@ def control(data, lock):
 
         # Multithreading stuff that must happen. Dont mind it.
         with lock:
-            doMTStuff(data)
+            doMTStuff(data, observer)
 
         # Get deltatime
         dt = getDT()
 
         ### Your code goes here
-        qube.setMotorVoltage(18)
-        # qube.setMotorSpeed(999)
-        qube.getPendulumAngle()
-        qube.getMotorCurrent()
-        qube.getMotorAngle()
-        
+        motor_position = qube.getMotorAngle()
+        degrees_error = setpoint - motor_position
+
+        degrees_error_2rad = np.deg2rad(degrees_error)
+
+        # current_rpm = qube.getMotorRPM()
+        # rpm_error = setpoint_rpm - current_rpm
+
+        control_input, _ = observer.regulate(degrees_error, last_controller_input)
+        control_input = np.clip(control_input, -24, 24)
+
+        qube.setMotorVoltage(control_input)
+        last_controller_input = control_input
 
 
 def getDT():
@@ -71,9 +80,9 @@ def getDT():
     return dt
 
 
-def doMTStuff(data):
+def doMTStuff(data, observer_instance):
     packet = data[7]
-    pid.copy(packet.pid)
+    observer_instance.copy(packet.Observer)
     if packet.resetEncoders:
         qube.resetMotorEncoder()
         qube.resetPendulumEncoder()

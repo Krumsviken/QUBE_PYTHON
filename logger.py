@@ -13,9 +13,6 @@ fieldnames = [
     "rpm",
     "voltage",
     "current",
-    "x_real",
-    "x_est",
-    "u",
 ]
 
 files = 0
@@ -66,8 +63,5 @@ def save_data(data):
             "rpm": data[4],
             "voltage": data[5],
             "current": data[6],
-            "x_real": data[7],
-            "x_est": data[8],
-            "u": data[9],
         }
         csv_writer.writerow(info)
