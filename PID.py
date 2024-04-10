@@ -4,7 +4,7 @@ from time import time
 
 kp = 0.04
 ki = 0.02
-kd = 0.0025
+kd = 0.002
 
 class PID:
     def __init__(self, P, I, D):

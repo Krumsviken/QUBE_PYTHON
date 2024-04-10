@@ -38,7 +38,7 @@ enableLogging()
 t_last = time()
 
 # Define the goal angle and voltage threshold
-m_target = 1000
+m_target = 250
 p_target = 0
 k1 = 120.02
 k2 = 2.396
@@ -48,7 +48,7 @@ pid = PID(kp, ki, kd)
 
 def control(data, lock):
     global m_target, p_target, observer, pid  # Ensure we're using the global observer object
-    v_ref = 1000
+    angle_ref = 250
 
     while True:
         # Updates the qube - Sends and receives data
@@ -66,25 +66,29 @@ def control(data, lock):
         dt = getDT()
 
         # PID
-        angle = qube.getMotorAngle()
-        u = pid.regulate(1000, angle)
+        #angle = qube.getMotorAngle()
+        #u = pid.regulate(1000, angle)
 
         # Observator
 
-        # x1 = qube.getMotorAngle()
-        # x2 = qube.getMotorRPM()
-        # error = v_ref - x1
+        x1 = qube.getMotorAngle()
+        x2 = qube.getMotorRPM()
+        est_angle = observer.x1_est
+        est_rpm = observer.x2_est
+        error = angle_ref - x1
 
-        # u = -k1 * x1 - k2 * error
-        # u = max(min(u, 24), -24)
+        u = -k1 * error - k2 * x2
+        #u = observer.regulate(500, x1)
+        u = max(min(u, 24), -24)
 
-        # speed = observer.regulate(x1, u, x2)
+        speed = observer.regulate(x1, u, x2)
 
         qube.setMotorVoltage(u)
-        # print("Reference Speed:", v_ref)
-        # print("Measured Speed:", x2)
-        # print("Control Input:", u)
-        # print("Estiamated Speed:", speed)
+        print("Reference Angle:", angle_ref)
+        print("Measured Speed:", x2)
+        print("Control Input:", u)
+        print("Estimated Speed:", speed)
+        print("Estimated Angle:", est_angle)
 
 
 
