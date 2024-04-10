@@ -40,8 +40,8 @@ t_last = time()
 # Define the goal angle and voltage threshold
 m_target = 250
 p_target = 0
-k1 = 120.02
-k2 = 2.396
+k1 = 0.015
+k2 = 0.0015
 observer = Observer()
 
 pid = PID(kp, ki, kd)
@@ -75,7 +75,7 @@ def control(data, lock):
         x2 = qube.getMotorRPM()
         est_angle = observer.x1_est
         est_rpm = observer.x2_est
-        error = angle_ref - x1
+        error = x1 - angle_ref
 
         u = -k1 * error - k2 * x2
         #u = observer.regulate(500, x1)
