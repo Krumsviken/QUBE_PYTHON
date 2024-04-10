@@ -5,10 +5,10 @@ import control as ctrl
 # Continuous system matrices
 A = np.array([[0, 1, 0], 
               [0, 0, 1], 
-              [-15391, -1511, -98]])
+              [0, 0, -7.6336]])
 B = np.array([[0], 
               [0], 
-              [29024]])
+              [15267]])
 C = np.array([[0, 1, 0]])
 D = np.array([[0]])
 

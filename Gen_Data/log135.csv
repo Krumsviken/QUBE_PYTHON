@@ -1,0 +1,2 @@
+time,motor_angle,motor_setpoint,pendulum_angle,pendulum_setpoint,rpm,voltage,current
+2.308,0.0,1000,0.0,0,0,0,0

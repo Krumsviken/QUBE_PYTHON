@@ -11,6 +11,8 @@
 # qube.getMotorCurrent() - Returns the newest reading of the motor's current.
 # ------------------------------------- AVAILABLE FUNCTIONS --------------------------------#
 
+# main.py
+
 from QUBE import *
 from logger import *
 from com import *
@@ -18,6 +20,8 @@ from liveplot import *
 from time import time
 import threading
 import numpy as np
+from Observer import Observer  # Importing the variables from observer.py
+from PID import *
 
 # Replace with the Arduino port. Can be found in the Arduino IDE (Tools -> Port:)
 port = "COM8"
@@ -33,14 +37,19 @@ enableLogging()
 
 t_last = time()
 
-m_target = 180
+# Define the goal angle and voltage threshold
+m_target = 1000
 p_target = 0
+k1 = 120.02
+k2 = 2.396
 observer = Observer()
-setpoint = 180
+
+pid = PID(kp, ki, kd)
 
 def control(data, lock):
-    global m_target, p_target, observer
-    last_controller_input = 0
+    global m_target, p_target, observer, pid  # Ensure we're using the global observer object
+    v_ref = 1000
+
     while True:
         # Updates the qube - Sends and receives data
         qube.update()
@@ -49,27 +58,34 @@ def control(data, lock):
         logdata = qube.getLogData(m_target, p_target)
         save_data(logdata)
 
-        # Multithreading stuff that must happen. Dont mind it.
+        # Multithreading stuff that must happen. Don't mind it.
         with lock:
-            doMTStuff(data, observer)
+            doMTStuff(data)
 
         # Get deltatime
         dt = getDT()
 
-        ### Your code goes here
-        motor_position = qube.getMotorAngle()
-        degrees_error = setpoint - motor_position
+        # PID
+        angle = qube.getMotorAngle()
+        u = pid.regulate(1000, angle)
 
-        degrees_error_2rad = np.deg2rad(degrees_error)
+        # Observator
 
-        # current_rpm = qube.getMotorRPM()
-        # rpm_error = setpoint_rpm - current_rpm
+        # x1 = qube.getMotorAngle()
+        # x2 = qube.getMotorRPM()
+        # error = v_ref - x1
 
-        control_input, _ = observer.regulate(degrees_error, last_controller_input)
-        control_input = np.clip(control_input, -24, 24)
+        # u = -k1 * x1 - k2 * error
+        # u = max(min(u, 24), -24)
 
-        qube.setMotorVoltage(control_input)
-        last_controller_input = control_input
+        # speed = observer.regulate(x1, u, x2)
+
+        qube.setMotorVoltage(u)
+        # print("Reference Speed:", v_ref)
+        # print("Measured Speed:", x2)
+        # print("Control Input:", u)
+        # print("Estiamated Speed:", speed)
+
 
 
 def getDT():
@@ -80,9 +96,9 @@ def getDT():
     return dt
 
 
-def doMTStuff(data, observer_instance):
+def doMTStuff(data):
     packet = data[7]
-    observer_instance.copy(packet.Observer)
+    #observer = observer(other)
     if packet.resetEncoders:
         qube.resetMotorEncoder()
         qube.resetPendulumEncoder()
